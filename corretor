@@ -1,0 +1,5 @@
+cat entrada.txt | while read in; do
+    echo "$in" | BC_LINE_LENGTH=0 bc;
+done > gabarito.txt
+
+diff -q gabarito.txt saida.txt
