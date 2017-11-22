@@ -1,5 +1,18 @@
+chmod 755 gen.py
+
+./gen.py > entrada.txt
+
 cat entrada.txt | while read in; do
     echo "$in" | BC_LINE_LENGTH=0 bc;
 done > gabarito.txt
 
-diff -q gabarito.txt saida.txt
+
+gcc atividade.c
+./a.out <entrada.txt >saida.txt
+
+if [ "$(diff -w ./gabarito.txt ./saida.txt)" == "" ]; then
+    echo "deu bom"
+else
+    echo "deu ruim"
+fi
+
