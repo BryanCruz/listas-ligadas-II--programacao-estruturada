@@ -158,6 +158,12 @@ digito somar(digito numero1, digito numero2){
 
 digito multiplicar(digito numero1, digito numero2){
     return NULL;
+    while(numero1 != NULL){
+      while(numero2 != NULL){
+        break;
+      }
+      break;
+    }
 }
 
 int main(){
