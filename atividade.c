@@ -110,10 +110,10 @@ digito somar(digito numero1, digito numero2){
     inverter(&numero1);
     inverter(&numero2);
 
+    int carry = 0;
     //faz a soma digito por digito
     while(numero1 != NULL || numero2 != NULL){
-      digito aux = novo(0);
-
+      digito aux = novo(carry);
       if(numero1 != NULL){
         //soma o valor
         aux->valor += numero1->valor;
@@ -127,6 +127,14 @@ digito somar(digito numero1, digito numero2){
 
         //itera a variavel
         numero2 = numero2->prox;
+      }
+
+      //verifica se tem que "enviar" o carry
+      if(aux->valor >= 10){
+        aux->valor -= 10;
+        carry = 1;
+      }else{
+        carry = 0;
       }
 
       //salva o valor
@@ -149,6 +157,8 @@ int main(){
     livres = NULL;
     op;
 
+    int teste = 0;
+
     digito numero1 = NULL, numero2 = NULL;
     while((numero1 = lerNumero()) != NULL){
         numero2 = lerNumero();
@@ -159,17 +169,21 @@ int main(){
         }else{
             resultado = multiplicar(numero1, numero2);
         }
-        printf("Numero 1: ");
-        imprimirNumero(numero1);
 
-        printf("Numero 2: ");
-        imprimirNumero(numero2);
+        if(teste){
+          printf("Numero 1: ");
+          imprimirNumero(numero1);
 
-        printf("Operação: %c\n", retornarOperacao());
+          printf("Numero 2: ");
+          imprimirNumero(numero2);
 
-        printf("Resultado: ");
-        imprimirNumero(resultado);
+          printf("Operação: %c\n", retornarOperacao());
 
+          printf("Resultado: ");
+          imprimirNumero(resultado);
+        }else{
+          imprimirNumero(resultado);
+        }
         deletarLista(numero1);
         deletarLista(numero2);
         deletarLista(resultado);

@@ -15,4 +15,3 @@ if [ "$(diff -w ./gabarito.txt ./saida.txt)" == "" ]; then
 else
     echo "deu ruim"
 fi
-
