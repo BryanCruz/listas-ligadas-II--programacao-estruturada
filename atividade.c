@@ -142,6 +142,13 @@ digito somar(digito numero1, digito numero2){
       resultado = aux;
     }
 
+    //adiciona um novo digito pois temos o valor do carry ainda
+    if(carry > 0){
+      digito aux = novo(carry);
+      aux->prox = resultado;
+      resultado = aux;
+    }
+
     //volta as listas pra condição original delas
     inverter(&numero1);
     inverter(&numero2);
