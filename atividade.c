@@ -22,6 +22,42 @@ char retornarOperacao(){
     return op;
 }
 
+void deletar(digito x){
+    x->prox = livres;
+    livres = x;
+}
+
+void deletarLista(digito l){
+  while(l != NULL){
+    digito aux = l->prox;
+    deletar(l);
+    l = aux;
+  }
+}
+
+digito novo(int valor){
+    if(livres == NULL){
+        int qtd = 1024;
+        digito aux = (digito) malloc(qtd*sizeof(struct digito_s));
+
+        if(aux != NULL){
+            for(int i = 0; i < qtd; i++){
+                deletar(aux+i);
+            }
+        }else{
+            printf("Erro: memória insuficiente para criar novos digitos\n");
+            return NULL;
+        }
+    }
+    digito x = livres;
+    livres = livres->prox;
+
+    x->valor = valor;
+    x->prox = NULL;
+
+    return x;
+}
+
 void imprimirNumero(digito numero){
     while (numero != NULL){
         printf("%d", numero->valor);
@@ -30,74 +66,79 @@ void imprimirNumero(digito numero){
     printf("\n");
 }
 
-void deleta(digito x){
-    x->prox = livres;
-    livres = x;
-}
-
-digito novo(int valor){
-    if(livres == NULL){
-        int qtd = 1024;
-        digito aux = (digito) malloc(qtd*sizeof(struct digito_s));
-        
-        if(aux != NULL){
-            for(int i = 0; i < qtd; i++){
-                deleta(aux+i);
-            }
-        }else{
-            printf("Erro: memória insuficiente para criar novos digitos\n");
-            return NULL;
-        }
-    }
-    digito x = livres;
-    x->valor = valor;
-    x->prox = NULL;
-    livres = livres->prox;
-    
-    return x;
-}
-
 digito lerNumero(){
     char o;
     digito numero = NULL;
-    
+
     if(scanf("%c", &o) != EOF){
         //leitura da lista (numero)
         numero = novo(charToInt(o)); //inicio da lista
-        
+
         /*le cada valor e insere como um digito
           no inicio do numero que já está gravado*/
         digito rodando = numero;
-        while(scanf("%c", &o) > 0 && (o != '+' && o != '*' && o != '\n')){
+        while(rodando != NULL && scanf("%c", &o) > 0 && (o != '+' && o != '*' && o != '\n')){
             rodando->prox = novo(charToInt(o));
             rodando = rodando->prox;
         }
-        
+
         if(o == '+' || o == '*'){
             definirOperacao(o);
         }
+
     }
-    
+
     return numero;
+}
+
+void inverter(digito *numero){
+  digito x = *numero;
+  *numero = NULL;
+
+  while (x != NULL) {
+    digito y = x->prox;
+    x->prox = *numero;
+    *numero = x;
+    x = y;
+  }
 }
 
 digito somar(digito numero1, digito numero2){
     digito resultado = NULL;
 
-    //preciso rodar os nós do resultado
+    //inverte os numeros pois a conta tem o sentido direita pra esquerda
+    inverter(&numero1);
+    inverter(&numero2);
+
+    //faz a soma digito por digito
     while(numero1 != NULL || numero2 != NULL){
-        if(numero1 != NULL && numero2 != NULL){
-            resultado = novo(numero1->valor + numero2->valor);
-        }else{
-            if(numero2 == NULL){
-                resultado = novo(numero1->valor);
-            }else{
-                resultado = novo(numero2->valor);
-            }
-        }
+      digito aux = novo(0);
+
+      if(numero1 != NULL){
+        //soma o valor
+        aux->valor += numero1->valor;
+
+        //itera a variavel
+        numero1 = numero1->prox;
+      }
+      if(numero2 != NULL){
+        //soma o valor
+        aux->valor += numero2->valor;
+
+        //itera a variavel
+        numero2 = numero2->prox;
+      }
+
+      //salva o valor
+      aux->prox = resultado;
+      resultado = aux;
     }
-    
-    return resultado;    
+
+    //volta as listas pra condição original delas
+    inverter(&numero1);
+    inverter(&numero2);
+
+    return resultado;
 }
 
 digito multiplicar(digito numero1, digito numero2){
@@ -107,29 +148,31 @@ digito multiplicar(digito numero1, digito numero2){
 int main(){
     livres = NULL;
     op;
-    
-    digito numero1 = NULL, numero2 = NULL;   
+
+    digito numero1 = NULL, numero2 = NULL;
     while((numero1 = lerNumero()) != NULL){
         numero2 = lerNumero();
-        
+
         digito resultado = NULL;
         if(op == '+'){
             resultado = somar(numero1, numero2);
         }else{
             resultado = multiplicar(numero1, numero2);
         }
-        
         printf("Numero 1: ");
         imprimirNumero(numero1);
-        
+
         printf("Numero 2: ");
         imprimirNumero(numero2);
-        
+
         printf("Operação: %c\n", retornarOperacao());
-        
+
         printf("Resultado: ");
         imprimirNumero(resultado);
-        
+
+        deletarLista(numero1);
+        deletarLista(numero2);
+        deletarLista(resultado);
     }
     return 0;
 }
