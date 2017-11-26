@@ -1,11 +1,10 @@
 chmod 755 gen.py
 
-./gen.py > entrada.txt
+gcc atividade.c
 
 cat entrada.txt | while read in; do
     echo "$in" | BC_LINE_LENGTH=0 bc;
 done > gabarito.txt
-
 
 gcc atividade.c
 ./a.out <entrada.txt >saida.txt

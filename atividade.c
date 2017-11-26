@@ -25,6 +25,9 @@ char retornarOperacao(){
 void deletar(digito x){
     x->prox = livres;
     livres = x;
+
+    //free(x);
+
 }
 
 void deletarLista(digito l){
@@ -45,8 +48,8 @@ digito novo(int valor){
                 deletar(aux+i);
             }
         }else{
-            printf("Erro: memória insuficiente para criar novos digitos\n");
-            return NULL;
+            fprintf(stderr, "Erro: memória insuficiente para criar novos digitos\n");
+            exit(1);
         }
     }
     digito x = livres;
@@ -56,6 +59,18 @@ digito novo(int valor){
     x->prox = NULL;
 
     return x;
+/*
+    digito x = (digito) malloc(sizeof(struct digito_s));
+    if(x == NULL){
+      fprintf(stderr, "Erro na alocação de memória\n");
+      exit(1);
+    }
+
+    x->valor = valor;
+    x->prox = NULL;
+
+    return x;
+*/
 }
 
 void imprimirNumero(digito numero){
@@ -110,6 +125,10 @@ digito somar(digito numero1, digito numero2){
     inverter(&numero1);
     inverter(&numero2);
 
+
+    digito inicioNumero1 = numero1;
+    digito inicioNumero2 = numero2;
+
     int carry = 0;
     //faz a soma digito por digito
     while(numero1 != NULL || numero2 != NULL){
@@ -130,11 +149,10 @@ digito somar(digito numero1, digito numero2){
       }
 
       //verifica se tem que "enviar" o carry
-      if(aux->valor >= 10){
+      carry = 0;
+      while(aux->valor >= 10){
         aux->valor -= 10;
-        carry = 1;
-      }else{
-        carry = 0;
+        carry++;
       }
 
       //salva o valor
@@ -142,7 +160,7 @@ digito somar(digito numero1, digito numero2){
       resultado = aux;
     }
 
-    //adiciona um novo digito pois temos o valor do carry ainda
+    //adiciona um novo digito se ainda tivermos algum carry
     if(carry > 0){
       digito aux = novo(carry);
       aux->prox = resultado;
@@ -150,29 +168,110 @@ digito somar(digito numero1, digito numero2){
     }
 
     //volta as listas pra condição original delas
-    inverter(&numero1);
-    inverter(&numero2);
+    inverter(&inicioNumero1);
+    inverter(&inicioNumero2);
 
+    while(resultado != NULL && resultado->valor == 0){
+      digito zeroAEsquerda = resultado;
+      resultado = resultado->prox;
+      deletar(zeroAEsquerda);
+    }
+
+    if(resultado == NULL) resultado = novo(0);
     return resultado;
 }
 
 digito multiplicar(digito numero1, digito numero2){
-    return NULL;
-    while(numero1 != NULL){
-      while(numero2 != NULL){
-        break;
-      }
-      break;
+  digito resultado = NULL;
+
+  //inverte os numeros pois a conta tem o sentido direita pra esquerda
+  inverter(&numero1);
+  inverter(&numero2);
+
+  digito inicioNumero1 = numero1;
+  digito inicioNumero2 = numero2;
+
+  //faz a multiplicacao
+  //  numero2
+  //X numero1
+  int carry = 0, qtdZerosAMais = 0;
+  while(numero1 != NULL){
+
+    digito resultadoAux = NULL;
+
+    //corrige o valor devido à posição decimal
+    //do digito que está multiplicando
+    for(int i = qtdZerosAMais; i > 0; i--){
+      digito aux = novo(0);
+      aux->prox = resultadoAux;
+      resultadoAux = aux;
     }
+    qtdZerosAMais++;
+
+    carry = 0;
+    while(numero2 != NULL){
+
+      digito aux = novo(carry);
+
+      //multiplica os valores e soma o carry
+      aux->valor += numero1->valor * numero2->valor;
+
+      //itera a variavel
+      numero2 = numero2->prox;
+
+      //verifica se tem que "enviar" o carry
+      carry = 0;
+      while(aux->valor >= 10){
+        aux->valor -= 10;
+        carry++;
+      }
+
+      //salva o valor
+      aux->prox = resultadoAux;
+      resultadoAux = aux;
+    }
+
+    //adiciona um novo digito se ainda tivermos algum carry
+    if(carry > 0){
+      digito aux = novo(carry);
+      aux->prox = resultadoAux;
+      resultadoAux = aux;
+    }
+
+    //soma o valor atual com o anterior
+    digito copiaResultado = resultado;
+    resultado = somar(resultado, resultadoAux);
+    deletarLista(copiaResultado);
+    //iteração
+    numero2 = inicioNumero2;
+    numero1 = numero1->prox;
+
+    //limpa a memoria do resultadoAux criado
+    deletarLista(resultadoAux);
+  }
+
+  //volta as listas pra condição original delas
+  inverter(&inicioNumero1);
+  inverter(&inicioNumero2);
+
+  while(resultado != NULL && resultado->valor == 0){
+    digito zeroAEsquerda = resultado;
+    resultado = resultado->prox;
+    deletar(zeroAEsquerda);
+  }
+
+  if(resultado == NULL) resultado = novo(0);
+  return resultado;
 }
 
 int main(){
     livres = NULL;
-    op;
+    op = '+';
 
     int teste = 0;
 
     digito numero1 = NULL, numero2 = NULL;
+    int cont = 0;
     while((numero1 = lerNumero()) != NULL){
         numero2 = lerNumero();
 
@@ -200,6 +299,7 @@ int main(){
         deletarLista(numero1);
         deletarLista(numero2);
         deletarLista(resultado);
+        fprintf(stderr, "%d\n", ++cont);
     }
     return 0;
 }
