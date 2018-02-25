@@ -1,2 +1,2 @@
 # pe_22_11_2017
-Listas Ligadas II
+Mais alguns exercícios para treinar os conceitos de listas ligadas.
